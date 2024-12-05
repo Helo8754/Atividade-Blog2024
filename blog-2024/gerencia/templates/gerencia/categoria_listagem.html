@@ -1,0 +1,172 @@
+{% extends 'base_gerencia.html' %}
+
+{% block main %}
+
+     <!-- Page Heading -->
+     <h1 class="h3 mb-2 text-gray-800">Gerenciar Categorias</h1>
+     <p class="mb-4">Aqui você pode editar ou remover as categorias existentes.</p>
+
+     <!-- Filtro de Notícias -->
+     <div class="card shadow mb-4">
+         <div class="card-header py-3">
+             <h6 class="m-0 font-weight-bold text-primary">Filtrar Categorias</h6>
+         </div>
+        <form action="{% url 'gerencia:categoria_listagem' %}" method="GET">
+         <div class="container-search">
+            <input type="text" name="nome" class="form-control input-search" placeholder="Buscar categoria">
+            <button class="search-button" type="submit">Buscar</button>
+         </div>
+         </form>
+     </div>
+
+     <!-- Notícias Table -->
+     <div class="card shadow mb-4">
+         <div class="card-header py-3">
+             <h6 class="m-0 font-weight-bold text-primary">Listagem de Categorias</h6>
+         </div>
+         <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                     <thead>
+                         <tr>
+                             <th style="width: 20%;">Nome</th>
+                             <th style="width: 10%;">Ações</th>
+                         </tr>
+                     </thead>
+                     <tbody>
+                         {% for categoria in categorias %}
+                         <tr>
+                             <td>{{ categoria.nome }}</td>
+                             <td>
+                                 <a href="{% url 'gerencia:categoria_editar' categoria.id %}" class="btn btn-warning btn-sm">Editar</a>
+                                 <form action="{% url 'gerencia:categoria_excluir' categoria.id %}" method="POST" style="display:inline;">
+                                     {% csrf_token %}
+                                     <button type="submit" class="btn btn-danger btn-sm">Remover</button>
+                                 </form>
+                             </td>
+                         </tr>
+                         {% endfor %}
+                     </tbody>
+                 </table>
+             </div>
+         </div>
+     </div>
+
+
+<div class="pagination-container">
+    <div class="pagination-stats text-muted mb-2">
+        Página {{ categorias.number }} de {{ categorias.paginator.num_pages }} 
+        (Total de {{ categorias.paginator.count }} categorias)
+    </div>
+    
+    <nav aria-label="Navegação de categorias">
+        <ul class="custom-pagination">
+            {% if categorias.has_previous %}
+                <li class="page-item first-page">
+                    <a href="?page=1&termo={{ termo }}" class="page-link">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                </li>
+                <li class="page-item previous-page">
+                    <a href="?page={{ categorias.previous_page_number }}&termo={{ termo }}" class="page-link">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+
+            {% with start=categorias.number|add:-2 end=categorias.number|add:2 %}
+                {% for num in categorias.paginator.page_range %}
+                    {% if num >= start and num <= end %}
+                        <li class="page-item {% if categorias.number == num %}active{% endif %}">
+                            <a href="?page={{ num }}&termo={{ termo }}" class="page-link">
+                                {{ num }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            {% endwith %}
+
+            {% if categorias.has_next %}
+                <li class="page-item next-page">
+                    <a href="?page={{ categorias.next_page_number }}&termo={{ termo }}" class="page-link">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                <li class="page-item last-page">
+                    <a href="?page={{ categorias.paginator.num_pages }}&termo={{ termo }}" class="page-link">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <div class="pagination-jump mt-2">
+        <form method="GET" class="form-inline justify-content-center">
+            <input type="hidden" name="termo" value="{{ termo }}">
+            <div class="input-group input-group-sm" style="max-width: 200px;">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">Ir para página</span>
+                </div>
+                <input type="number" 
+                       name="page" 
+                       class="form-control" 
+                       min="1" 
+                       max="{{ categorias.paginator.num_pages }}"
+                       placeholder="Nº página">
+                <div class="input-group-append">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.custom-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.custom-pagination .page-item {
+    margin: 0 5px;
+}
+
+.custom-pagination .page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.custom-pagination .page-link {
+    color: #007bff;
+    background-color: white;
+    border: 1px solid #dee2e6;
+    padding: 0.5rem 0.75rem;
+    line-height: 1.25;
+    border-radius: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.custom-pagination .page-link:hover {
+    background-color: #f8f9fa;
+    border-color: #ddd;
+}
+</style>
+
+     <div class="d-flex justify-content-end">
+        <a href="{% url 'gerencia:categoria_cadastro'%}" class="btn btn-primary btn-icon-split">
+            <span class="icon text-white-50">
+                <i class="fas fa-flag"></i>
+            </span>
+            <span class="text">Cadastrar Nova Categoria</span>
+        </a>
+    </div>
+
+{% endblock %}
